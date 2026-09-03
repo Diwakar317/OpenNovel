@@ -25,7 +25,13 @@ async function fetchHTML(url: string) {
   const response = await fetch(url, { headers: DEFAULT_HEADERS });
   if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.status}`);
   const html = await response.text();
-  return cheerio.load(html);
+  const $ = cheerio.load(html);
+  
+  if ($('title').text().includes('Just a moment...')) {
+    throw new Error('Cloudflare rate limit active. Please wait a few minutes before trying again.');
+  }
+  
+  return $;
 }
 
 /**
@@ -76,7 +82,7 @@ export async function scrapeNovelArrowNovel(url: string): Promise<ScrapedNovel> 
 /**
  * Scrapes Ranobes for novel data and chapters
  */
-export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
+export async function scrapeRanobesNovel(url: string, maxPages?: number): Promise<ScrapedNovel> {
   const $ = await fetchHTML(url);
   
   let title = $('meta[property="og:title"]').attr('content') || $('h1').first().text().trim();
@@ -120,20 +126,21 @@ export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
     if (firstPageData && firstPageData.chapters && Array.isArray(firstPageData.chapters)) {
       let allChaptersData = [...firstPageData.chapters];
       const totalPages = firstPageData.pages_count || 1;
+      const targetPages = maxPages ? Math.min(totalPages, maxPages) : totalPages;
       
-      if (totalPages > 1) {
-        // Fetch remaining pages in batches of 5 to speed up without hitting strict rate limits
-        for (let i = 2; i <= totalPages; i += 5) {
-          const batchPromises = [];
-          for (let j = 0; j < 5 && (i + j) <= totalPages; j++) {
-            batchPromises.push(fetchChapterPage(`https://ranobes.net/chapters/${novelId}/page/${i + j}/`));
+      if (targetPages > 1) {
+        // Fetch sequentially with a delay to avoid Cloudflare rate limits
+        for (let i = 2; i <= targetPages; i++) {
+          const data = await fetchChapterPage(`https://ranobes.net/chapters/${novelId}/page/${i}/`);
+          if (data && data.chapters && Array.isArray(data.chapters)) {
+            allChaptersData = allChaptersData.concat(data.chapters);
+          } else {
+            // Stop pagination if we hit a rate limit block
+            console.warn(`Failed or blocked on page ${i}, stopping pagination early.`);
+            break; 
           }
-          const batchResults = await Promise.all(batchPromises);
-          for (const data of batchResults) {
-            if (data && data.chapters && Array.isArray(data.chapters)) {
-              allChaptersData = allChaptersData.concat(data.chapters);
-            }
-          }
+          // 1000ms delay to mimic human reading and avoid rate limits
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
 

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import SyncChapters from '@/components/SyncChapters';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,9 @@ export default async function NovelPage({ params }: { params: Promise<{ id: stri
                 Delete Novel
               </button>
             </form>
+          </div>
+          <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <SyncChapters novelId={novel.id} />
           </div>
         </div>
       </div>
