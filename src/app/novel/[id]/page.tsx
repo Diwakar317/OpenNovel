@@ -17,6 +17,15 @@ export default async function NovelPage({ params }: { params: Promise<{ id: stri
 
   if (!novel) notFound();
 
+  const deleteAction = async () => {
+    'use server';
+    await prisma.novel.delete({ where: { id: novel.id } });
+    const { revalidatePath } = await import('next/cache');
+    const { redirect } = await import('next/navigation');
+    revalidatePath('/');
+    redirect('/');
+  };
+
   return (
     <div>
       <div className="card novel-header">
@@ -34,9 +43,16 @@ export default async function NovelPage({ params }: { params: Promise<{ id: stri
             <span className="text-muted">Chapters: {novel.chapters.length}</span>
             <span className="text-muted">Updates: ~{novel.expectedUpdateHour}:00</span>
           </div>
-          <a href={novel.sourceUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-            View on Source
-          </a>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <a href={novel.sourceUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+              View on Source
+            </a>
+            <form action={deleteAction}>
+              <button type="submit" className="btn btn-secondary" style={{ color: '#fa5252', borderColor: '#fa5252' }}>
+                Delete Novel
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 

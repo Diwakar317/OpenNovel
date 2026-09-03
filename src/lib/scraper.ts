@@ -79,33 +79,46 @@ export async function scrapeNovelArrowNovel(url: string): Promise<ScrapedNovel> 
 export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
   const $ = await fetchHTML(url);
   
-  const title = $('h1').first().text().trim();
-  const coverImageUrl = $('.poster img').attr('src') || $('meta[property="og:image"]').attr('content') || null;
+  let title = $('meta[property="og:title"]').attr('content') || $('h1').first().text().trim();
+  title = title.split('•')[0].trim(); // Clean up long alternate titles
+
+  let coverImageUrl = $('meta[property="og:image"]').attr('content') || $('.poster img').attr('src') || null;
+  if (coverImageUrl && coverImageUrl.startsWith('/')) {
+    coverImageUrl = `https://ranobes.net${coverImageUrl}`;
+  }
   
   const chapters: ScrapedChapter[] = [];
   
-  // Ranobes might not have all chapters on the main page. 
-  // We'll scrape what's available in the chapter list container.
-  $('.chapters-list a, a[href*=".html"]').each((i, el) => {
+  // Try to find all valid chapter links on either the /novels/ info page or the chapter list page.
+  $('a[href*=".html"]').each((i, el) => {
     const chapUrl = $(el).attr('href');
     const chapTitle = $(el).text().trim();
     
-    // Check if it's a chapter link (usually ends with numbers.html or in a specific list)
-    if (chapUrl && chapUrl.includes('.html') && $(el).parents('.chapters-list').length > 0) {
-       const numMatch = chapTitle.match(/\d+/);
-       const chapterNumber = numMatch ? parseFloat(numMatch[0]) : i + 1;
-       
-       const absoluteUrl = chapUrl.startsWith('http') ? chapUrl : `https://ranobes.net${chapUrl.startsWith('/') ? '' : '/'}${chapUrl}`;
-       
-       chapters.push({
-         title: chapTitle,
-         url: absoluteUrl,
-         chapterNumber
-       });
+    // Valid chapters typically contain numbers and are not generic links like rules or search
+    if (chapUrl && !chapUrl.includes('/search.html') && !chapUrl.includes('/rules.html') && !chapUrl.includes('#comment')) {
+       // Only grab if the text indicates a chapter or it's clearly a chapter link format
+       if (chapTitle.toLowerCase().includes('chapter') || chapUrl.match(/\/\d+\.html$/)) {
+         const numMatch = chapTitle.match(/\d+/) || chapUrl.match(/\d+/);
+         const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
+         
+         const absoluteUrl = chapUrl.startsWith('http') ? chapUrl : `https://ranobes.net${chapUrl.startsWith('/') ? '' : '/'}${chapUrl}`;
+         
+         // Prevent duplicates
+         if (!chapters.find(c => c.url === absoluteUrl)) {
+           chapters.push({
+             title: chapTitle || `Chapter ${chapterNumber}`,
+             url: absoluteUrl,
+             chapterNumber
+           });
+         }
+       }
     }
   });
 
-  return { title, coverImageUrl, chapters: chapters.reverse() };
+  // Sort chapters by number ascending (oldest first)
+  chapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
+
+  return { title, coverImageUrl, chapters };
 }
 
 /**
