@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Novel {
+  id                   String    @id @default(uuid())
+  title                String
+  sourceUrl            String    @unique
+  sourceDomain         String
+  coverImageUrl        String?
+  coverImageBase64     String?
+  lastChecked          DateTime  @default(now())
+  expectedUpdateHour   Int       @default(0) // 0-23
+  latestChapterNumber  Float     @default(0)
+  chapters             Chapter[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Chapter {
+  id            String   @id @default(uuid())
+  novelId       String
+  novel         Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  title         String
+  chapterNumber Float
+  content       String   // HTML content
+  sourceUrl     String   @unique
+  createdAt     DateTime @default(now())
+}
