@@ -176,7 +176,7 @@ export default function ChapterList({ novelId, chapters }: { novelId: string, ch
                 </Link>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div className="chapter-actions" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <span className="text-muted" style={{ fontSize: '0.75rem', marginRight: '0.5rem', display: 'none' }}>
                   {new Date(chapter.createdAt).toISOString().split('T')[0]}
                 </span>

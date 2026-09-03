@@ -41,7 +41,7 @@ export default function AddNovelForm() {
         Paste a link from Ranobes or NovelArrow to add it to your library and seamlessly track your reading progress.
       </p>
       
-      <form onSubmit={handleSubmit} style={{ display: 'flex', maxWidth: '700px', margin: '0 auto', boxShadow: 'var(--shadow-md)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+      <form onSubmit={handleSubmit} className="hero-form">
         <input 
           type="url" 
           placeholder="https://ranobes.net/novels/..."

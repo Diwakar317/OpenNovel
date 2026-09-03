@@ -35,7 +35,7 @@ export default async function NovelPage({ params }: { params: Promise<{ id: stri
     <div className="container" style={{ padding: '2rem 1.5rem' }}>
       
       {/* Novel Header Section */}
-      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', marginBottom: '3rem', background: 'var(--bg-secondary)', padding: '2rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)' }}>
+      <div className="novel-details-container">
         {novel.coverImageBase64 ? (
           <img 
             src={novel.coverImageBase64} 
@@ -48,7 +48,7 @@ export default async function NovelPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
         
-        <div style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column' }}>
+        <div className="details-content" style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column' }}>
           <h1 style={{ marginBottom: '0.5rem', fontSize: '2.2rem', fontWeight: 800 }}>{novel.title}</h1>
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <span style={{ padding: '0.2rem 0.6rem', background: 'var(--bg-tertiary)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>Source: {novel.sourceDomain}</span>

@@ -264,7 +264,77 @@ h3 { font-size: 1.5rem; }
   line-height: 1.8;
 }
 
+/* Layout Utilities */
+.hero-form {
+  display: flex;
+  flex-direction: row;
+  max-width: 700px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.novel-details-container {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.chapter-row {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+  background-color: transparent;
+}
+
 @media (max-width: 768px) {
+  .hero-form {
+    flex-direction: column;
+    border-radius: var(--radius-md);
+  }
+  
+  .hero-form input {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+  
+  .hero-form button {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    padding: 1rem !important;
+  }
+
+  .novel-details-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+  }
+  
+  .novel-details-container .details-content {
+    align-items: center;
+  }
+
+  .chapter-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .chapter-row .chapter-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+
   .grid-novels {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 1rem;
@@ -272,4 +342,29 @@ h3 { font-size: 1.5rem; }
   
   h1 { font-size: 1.75rem; }
   h2 { font-size: 1.5rem; }
+}
+
+.reader-options-modal {
+  position: fixed;
+  top: 5rem;
+  right: 1rem;
+  width: 320px;
+  background: #333333;
+  color: #e0e0e0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  font-family: Inter, sans-serif;
+  z-index: 1000;
+}
+
+@media (max-width: 480px) {
+  .reader-options-modal {
+    width: calc(100% - 2rem);
+    right: 1rem;
+    left: 1rem;
+  }
 }

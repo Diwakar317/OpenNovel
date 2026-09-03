@@ -210,22 +210,7 @@ export default function ChapterReader({ novelId, chapterId }: { novelId: string,
 
       {/* Options Panel Overlay */}
       {showOptions && (
-        <div style={{
-          position: 'fixed',
-          top: '5rem',
-          right: '1rem',
-          width: '320px',
-          background: '#333333', 
-          color: '#e0e0e0', 
-          padding: '1.5rem', 
-          borderRadius: '8px', 
-          boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '1.2rem',
-          fontFamily: 'Inter, sans-serif',
-          zIndex: 1000
-        }}>
+        <div className="reader-options-modal">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #444', paddingBottom: '0.8rem' }}>
             <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, letterSpacing: '0.5px' }}>READING SETTINGS</h3>
             <button onClick={() => setShowOptions(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}>&times;</button>
