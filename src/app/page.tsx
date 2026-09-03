@@ -16,7 +16,7 @@ export default async function Home() {
       <AddNovelForm />
 
       <div className="grid-novels">
-        {novels.map(novel => (
+        {novels.map((novel: any) => (
           <Link href={`/novel/${novel.id}`} key={novel.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {novel.coverImageBase64 ? (
               <img 

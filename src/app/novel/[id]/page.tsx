@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-export default async function NovelPage({ params }: { params: { id: string } }) {
+export default async function NovelPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const novel = await prisma.novel.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       chapters: {
         orderBy: { chapterNumber: 'desc' }
@@ -41,7 +42,7 @@ export default async function NovelPage({ params }: { params: { id: string } }) 
 
       <h2>Chapters</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-        {novel.chapters.map(chapter => (
+        {novel.chapters.map((chapter: any) => (
           <Link 
             href={`/novel/${novel.id}/chapter/${chapter.id}`} 
             key={chapter.id}

@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { scrapeChapterContent } from '@/lib/scraper';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const chapterId = params.id;
+    const chapterId = (await params).id;
     const chapter = await prisma.chapter.findUnique({
       where: { id: chapterId },
       include: { novel: true }

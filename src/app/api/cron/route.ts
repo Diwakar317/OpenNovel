@@ -47,7 +47,7 @@ export async function GET(req: Request) {
             }))
           });
 
-          const maxChapter = Math.max(...scrapedData.chapters.map(c => c.chapterNumber));
+          const maxChapter = Math.max(...scrapedData.chapters.map((c: any) => c.chapterNumber));
 
           await prisma.novel.update({
             where: { id: novel.id },
