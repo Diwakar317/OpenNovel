@@ -47,15 +47,7 @@ export default function ChapterReader({ novelId, chapterId }: { novelId: string,
       </div>
       
       <div 
-        className="chapter-content"
-        style={{ 
-          fontSize: '1.125rem', 
-          lineHeight: '1.8',
-          background: 'var(--bg-secondary)',
-          padding: '2rem',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-sm)'
-        }}
+        className="chapter-content reader-content"
         dangerouslySetInnerHTML={{ __html: chapter.content }}
       />
     </div>

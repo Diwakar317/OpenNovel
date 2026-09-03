@@ -19,7 +19,7 @@ export default async function NovelPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div>
-      <div className="card" style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
+      <div className="card novel-header">
         {novel.coverImageBase64 && (
           <img 
             src={novel.coverImageBase64} 
@@ -29,7 +29,7 @@ export default async function NovelPage({ params }: { params: Promise<{ id: stri
         )}
         <div>
           <h1 style={{ marginBottom: '1rem' }}>{novel.title}</h1>
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+          <div className="flex-wrap" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
             <span className="text-muted">Source: {novel.sourceDomain}</span>
             <span className="text-muted">Chapters: {novel.chapters.length}</span>
             <span className="text-muted">Updates: ~{novel.expectedUpdateHour}:00</span>

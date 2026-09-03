@@ -39,7 +39,7 @@ export default function AddNovelForm() {
       <h2>Add New Bookmark</h2>
       <p className="text-muted" style={{ marginBottom: '1rem' }}>Paste a link from Ranobes or NovelArrow to start tracking it.</p>
       
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '1rem' }}>
+      <form onSubmit={handleSubmit} className="flex-responsive">
         <input 
           type="url" 
           placeholder="https://ranobes.net/novels/..."
