@@ -17,9 +17,23 @@ model Novel {
   lastChecked          DateTime  @default(now())
   expectedUpdateHour   Int       @default(0) // 0-23
   latestChapterNumber  Float     @default(0)
+  isSyncing            Boolean   @default(false)
   chapters             Chapter[]
+  syncJobs             SyncJob[]
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+}
+
+model SyncJob {
+  id         String   @id @default(uuid())
+  novelId    String
+  novel      Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  status     String   @default("PENDING") // PENDING, PROCESSING, FAILED, COMPLETED
+  retryCount Int      @default(0)
+  nextRetry  DateTime @default(now())
+  errorMsg   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Chapter {
@@ -30,5 +44,6 @@ model Chapter {
   chapterNumber Float
   content       String   // HTML content
   sourceUrl     String   @unique
+  isRead        Boolean  @default(false)
   createdAt     DateTime @default(now())
 }

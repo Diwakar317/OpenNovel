@@ -35,11 +35,13 @@ export default function AddNovelForm() {
   };
 
   return (
-    <div className="card" style={{ marginBottom: '2rem' }}>
-      <h2>Add New Bookmark</h2>
-      <p className="text-muted" style={{ marginBottom: '1rem' }}>Paste a link from Ranobes or NovelArrow to start tracking it.</p>
+    <div style={{ padding: '3rem 0', textAlign: 'center', marginBottom: '2rem' }}>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 800 }}>Welcome to OpenNovel</h1>
+      <p className="text-muted" style={{ marginBottom: '2rem', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
+        Paste a link from Ranobes or NovelArrow to add it to your library and seamlessly track your reading progress.
+      </p>
       
-      <form onSubmit={handleSubmit} className="flex-responsive">
+      <form onSubmit={handleSubmit} style={{ display: 'flex', maxWidth: '700px', margin: '0 auto', boxShadow: 'var(--shadow-md)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
         <input 
           type="url" 
           placeholder="https://ranobes.net/novels/..."
@@ -48,18 +50,19 @@ export default function AddNovelForm() {
           required
           style={{ 
             flex: 1, 
-            padding: '0.75rem', 
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-tertiary)',
-            color: 'var(--text-primary)'
+            padding: '1.25rem 1.5rem', 
+            border: 'none',
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            fontSize: '1.1rem',
+            outline: 'none'
           }}
         />
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Adding...' : 'Bookmark Novel'}
+        <button type="submit" style={{ padding: '0 2rem', background: 'var(--accent-color)', color: '#fff', border: 'none', fontWeight: 600, fontSize: '1.1rem', cursor: 'pointer', transition: 'background 0.2s' }} disabled={loading}>
+          {loading ? 'Adding...' : 'Add to Library'}
         </button>
       </form>
-      {error && <p style={{ color: '#fa5252', marginTop: '0.5rem' }}>{error}</p>}
+      {error && <p style={{ color: '#fa5252', marginTop: '1rem' }}>{error}</p>}
     </div>
   );
 }

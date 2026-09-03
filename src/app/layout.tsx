@@ -10,25 +10,30 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'OpenNovel | Personal Reader',
-  description: 'Your personal novel aggregator and reader.',
+  title: 'OpenNovel',
+  description: 'A beautifully designed web novel reader and offline sync tool.',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <header className="app-header">
           <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent-color)' }}>
-              OpenNovel
+            <Link href="/" className="app-logo" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+              <span style={{ color: 'var(--accent-color)' }}>❖</span> OpenNovel
             </Link>
-            <nav>
-              <Link href="/bookmarks" className="btn btn-secondary">Bookmarks</Link>
+            <nav style={{ display: 'flex', gap: '1rem' }}>
+              <Link href="/" className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                </svg>
+                Library
+              </Link>
             </nav>
           </div>
         </header>

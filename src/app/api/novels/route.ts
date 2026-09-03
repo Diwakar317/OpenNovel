@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { scrapeNovel } from '@/lib/scraper';
+import { addSyncJob } from '@/lib/syncQueue';
 
 async function fetchImageAsBase64(url: string | null) {
   if (!url) return null;
@@ -27,14 +28,12 @@ export async function POST(req: Request) {
 
     const domain = new URL(url).hostname;
     
-    // Scrape the novel
-    const scrapedData = await scrapeNovel(url);
+    // Fast initial scrape: Only fetch the first page (25 chapters)
+    const scrapedData = await scrapeNovel(url, 1);
     
     // Fetch Cover as Base64 to save dependencies
     const base64Cover = await fetchImageAsBase64(scrapedData.coverImageUrl);
 
-    // Smart Sync: set expected update hour to current hour (rough heuristic)
-    // A more advanced version would parse timestamps from the chapters if available.
     const expectedUpdateHour = new Date().getHours();
 
     const novel = await prisma.novel.create({
@@ -45,6 +44,7 @@ export async function POST(req: Request) {
         coverImageUrl: scrapedData.coverImageUrl,
         coverImageBase64: base64Cover,
         expectedUpdateHour,
+        isSyncing: true, // Mark as syncing
         latestChapterNumber: scrapedData.chapters.length > 0 
           ? Math.max(...scrapedData.chapters.map(c => c.chapterNumber))
           : 0,
@@ -53,11 +53,14 @@ export async function POST(req: Request) {
             title: c.title,
             sourceUrl: c.url,
             chapterNumber: c.chapterNumber,
-            content: '', // Will be fetched when reading
+            content: '',
           }))
         }
       }
     });
+
+    // Push novel to the background Sync Queue
+    await addSyncJob(novel.id);
 
     return NextResponse.json({ success: true, novel });
   } catch (error: any) {

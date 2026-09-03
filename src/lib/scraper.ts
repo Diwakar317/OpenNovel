@@ -198,9 +198,9 @@ export async function scrapeRanobesNovel(url: string, maxPages?: number): Promis
 /**
  * Universal dispatcher
  */
-export async function scrapeNovel(url: string): Promise<ScrapedNovel> {
+export async function scrapeNovel(url: string, maxPages?: number): Promise<ScrapedNovel> {
   if (url.includes('novelarrow.com')) return scrapeNovelArrowNovel(url);
-  if (url.includes('ranobes.net')) return scrapeRanobesNovel(url);
+  if (url.includes('ranobes.net')) return scrapeRanobesNovel(url, maxPages);
   throw new Error("Unsupported domain");
 }
 
