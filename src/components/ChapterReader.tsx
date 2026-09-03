@@ -117,7 +117,11 @@ export default function ChapterReader({ novelId, chapterId }: { novelId: string,
       color: settings.textColor, 
       minHeight: '100vh', 
       transition: 'all 0.2s',
-      fontFamily: settings.fontFamily 
+      fontFamily: settings.fontFamily,
+      width: '100vw',
+      marginLeft: 'calc(-50vw + 50%)',
+      marginTop: '-2rem',
+      paddingTop: '2rem'
     }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem 5rem 1rem', width: '100%' }}>
         
@@ -141,7 +145,7 @@ export default function ChapterReader({ novelId, chapterId }: { novelId: string,
         </div>
 
         {/* Navigation Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="reader-nav" style={{ marginBottom: '3rem' }}>
           {chapter.prevChapterId ? (
             <Link href={`/novel/${novelId}/chapter/${chapter.prevChapterId}`} className="btn-pill">
               &laquo; BACK
@@ -184,7 +188,7 @@ export default function ChapterReader({ novelId, chapterId }: { novelId: string,
         <div ref={bottomRef} style={{ height: '20px', width: '100%', marginTop: '1rem' }} />
         
         {/* Bottom Navigation */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="reader-nav" style={{ marginTop: '4rem' }}>
           {chapter.prevChapterId ? (
             <Link href={`/novel/${novelId}/chapter/${chapter.prevChapterId}`} className="btn-pill">
               &laquo; BACK

@@ -361,10 +361,28 @@ h3 { font-size: 1.5rem; }
   z-index: 1000;
 }
 
+.reader-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
 @media (max-width: 480px) {
   .reader-options-modal {
     width: calc(100% - 2rem);
     right: 1rem;
     left: 1rem;
+  }
+  
+  .reader-nav {
+    gap: 0.2rem;
+  }
+  
+  .reader-nav .btn-pill {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    flex: 1;
+    text-align: center;
   }
 }
