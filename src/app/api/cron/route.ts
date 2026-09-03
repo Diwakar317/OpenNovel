@@ -34,11 +34,11 @@ export async function GET(req: Request) {
         });
         const existingUrls = new Set(existingChapters.map(c => c.sourceUrl));
 
-        const newChapters = scrapedData.chapters.filter(c => !existingUrls.has(c.url));
+        const newChapters = scrapedData.chapters.filter((c: any) => !existingUrls.has(c.url));
 
         if (newChapters.length > 0) {
           await prisma.chapter.createMany({
-            data: newChapters.map(c => ({
+            data: newChapters.map((c: any) => ({
               novelId: novel.id,
               title: c.title,
               sourceUrl: c.url,
