@@ -107,16 +107,20 @@ export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
         const data = JSON.parse(jsonMatch[1]);
         if (data.chapters && Array.isArray(data.chapters)) {
           data.chapters.forEach((c: any) => {
-            const numMatch = c.title.match(/\d+/);
-            const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
-            
-            // Prevent duplicates
-            if (!chapters.find(existing => existing.url === c.link)) {
-              chapters.push({
-                title: c.title,
-                url: c.link,
-                chapterNumber
-              });
+            const cleanTitle = c.title.trim();
+            // Strictly match 'Chapter [number]' at the start to avoid junk recommendations
+            if (/^chapter\s*\d+/i.test(cleanTitle)) {
+              const numMatch = cleanTitle.match(/\d+/);
+              const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
+              
+              // Prevent duplicates
+              if (!chapters.find(existing => existing.url === c.link)) {
+                chapters.push({
+                  title: cleanTitle,
+                  url: c.link,
+                  chapterNumber
+                });
+              }
             }
           });
         }
@@ -133,15 +137,16 @@ export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
       const chapTitle = $(el).text().trim();
       
       if (chapUrl && !chapUrl.includes('/search.html') && !chapUrl.includes('/rules.html') && !chapUrl.includes('#comment')) {
-         if (chapTitle.toLowerCase().includes('chapter') || chapUrl.match(/\/\d+\.html$/)) {
-           const numMatch = chapTitle.match(/\d+/) || chapUrl.match(/\d+/);
+         // Strictly match 'Chapter [number]' to avoid junk
+         if (/^chapter\s*\d+/i.test(chapTitle)) {
+           const numMatch = chapTitle.match(/\d+/);
            const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
            
            const absoluteUrl = chapUrl.startsWith('http') ? chapUrl : `https://ranobes.net${chapUrl.startsWith('/') ? '' : '/'}${chapUrl}`;
            
            if (!chapters.find(c => c.url === absoluteUrl)) {
              chapters.push({
-               title: chapTitle || `Chapter ${chapterNumber}`,
+               title: chapTitle,
                url: absoluteUrl,
                chapterNumber
              });
