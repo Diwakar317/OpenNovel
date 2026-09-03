@@ -80,7 +80,7 @@ export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
   const $ = await fetchHTML(url);
   
   let title = $('meta[property="og:title"]').attr('content') || $('h1').first().text().trim();
-  title = title.split('•')[0].trim(); // Clean up long alternate titles
+  title = title.split('•')[0].trim();
 
   let coverImageUrl = $('meta[property="og:image"]').attr('content') || $('.poster img').attr('src') || null;
   if (coverImageUrl && coverImageUrl.startsWith('/')) {
@@ -89,31 +89,67 @@ export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
   
   const chapters: ScrapedChapter[] = [];
   
-  // Try to find all valid chapter links on either the /novels/ info page or the chapter list page.
-  $('a[href*=".html"]').each((i, el) => {
-    const chapUrl = $(el).attr('href');
-    const chapTitle = $(el).text().trim();
-    
-    // Valid chapters typically contain numbers and are not generic links like rules or search
-    if (chapUrl && !chapUrl.includes('/search.html') && !chapUrl.includes('/rules.html') && !chapUrl.includes('#comment')) {
-       // Only grab if the text indicates a chapter or it's clearly a chapter link format
-       if (chapTitle.toLowerCase().includes('chapter') || chapUrl.match(/\/\d+\.html$/)) {
-         const numMatch = chapTitle.match(/\d+/) || chapUrl.match(/\d+/);
-         const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
-         
-         const absoluteUrl = chapUrl.startsWith('http') ? chapUrl : `https://ranobes.net${chapUrl.startsWith('/') ? '' : '/'}${chapUrl}`;
-         
-         // Prevent duplicates
-         if (!chapters.find(c => c.url === absoluteUrl)) {
-           chapters.push({
-             title: chapTitle || `Chapter ${chapterNumber}`,
-             url: absoluteUrl,
-             chapterNumber
-           });
-         }
-       }
+  // Extract ID to fetch from the dedicated chapters endpoint
+  const idMatch = url.match(/ranobes\.net\/(?:novels\/)?(\d+)/);
+  if (idMatch) {
+    const novelId = idMatch[1];
+    try {
+      const chapterRes = await fetch(`https://ranobes.net/chapters/${novelId}/`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+        }
+      });
+      const chapterHtml = await chapterRes.text();
+      
+      // The chapters page contains a JSON payload in window.__DATA__
+      const jsonMatch = chapterHtml.match(/window\.__DATA__\s*=\s*({[\s\S]+?});/);
+      if (jsonMatch) {
+        const data = JSON.parse(jsonMatch[1]);
+        if (data.chapters && Array.isArray(data.chapters)) {
+          data.chapters.forEach((c: any) => {
+            const numMatch = c.title.match(/\d+/);
+            const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
+            
+            // Prevent duplicates
+            if (!chapters.find(existing => existing.url === c.link)) {
+              chapters.push({
+                title: c.title,
+                url: c.link,
+                chapterNumber
+              });
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch chapters from chapters endpoint:", e);
     }
-  });
+  }
+
+  // Fallback to static HTML scraping if the chapters API failed or returned nothing
+  if (chapters.length === 0) {
+    $('a[href*=".html"]').each((i, el) => {
+      const chapUrl = $(el).attr('href');
+      const chapTitle = $(el).text().trim();
+      
+      if (chapUrl && !chapUrl.includes('/search.html') && !chapUrl.includes('/rules.html') && !chapUrl.includes('#comment')) {
+         if (chapTitle.toLowerCase().includes('chapter') || chapUrl.match(/\/\d+\.html$/)) {
+           const numMatch = chapTitle.match(/\d+/) || chapUrl.match(/\d+/);
+           const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
+           
+           const absoluteUrl = chapUrl.startsWith('http') ? chapUrl : `https://ranobes.net${chapUrl.startsWith('/') ? '' : '/'}${chapUrl}`;
+           
+           if (!chapters.find(c => c.url === absoluteUrl)) {
+             chapters.push({
+               title: chapTitle || `Chapter ${chapterNumber}`,
+               url: absoluteUrl,
+               chapterNumber
+             });
+           }
+         }
+      }
+    });
+  }
 
   // Sort chapters by number ascending (oldest first)
   chapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
