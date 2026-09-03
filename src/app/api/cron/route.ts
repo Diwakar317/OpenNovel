@@ -11,14 +11,8 @@ export async function GET(req: Request) {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    const currentHour = new Date().getHours();
-
-    // Find novels that are expected to update in this hour
-    const novelsToUpdate = await prisma.novel.findMany({
-      where: {
-        expectedUpdateHour: currentHour
-      }
-    });
+    // Since Vercel Hobby limits cron to once a day, sync ALL novels.
+    const novelsToUpdate = await prisma.novel.findMany();
 
     let updatedCount = 0;
 
