@@ -93,40 +93,66 @@ export async function scrapeRanobesNovel(url: string): Promise<ScrapedNovel> {
   const idMatch = url.match(/ranobes\.net\/(?:novels\/)?(\d+)/);
   if (idMatch) {
     const novelId = idMatch[1];
-    try {
-      const chapterRes = await fetch(`https://ranobes.net/chapters/${novelId}/`, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+    
+    // Helper function to fetch and parse a specific chapter page
+    const fetchChapterPage = async (pageUrl: string) => {
+      try {
+        const res = await fetch(pageUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+          }
+        });
+        const html = await res.text();
+        const match = html.match(/<script[^>]*>\s*window\.__DATA__\s*=\s*([\s\S]+?)<\/script>/i);
+        if (match) {
+          let jsonStr = match[1].trim();
+          if (jsonStr.endsWith(';')) jsonStr = jsonStr.slice(0, -1);
+          return JSON.parse(jsonStr);
         }
-      });
-      const chapterHtml = await chapterRes.text();
+      } catch (e) {
+        console.warn(`Failed to fetch chapter page ${pageUrl}:`, e);
+      }
+      return null;
+    };
+
+    const firstPageData = await fetchChapterPage(`https://ranobes.net/chapters/${novelId}/`);
+    
+    if (firstPageData && firstPageData.chapters && Array.isArray(firstPageData.chapters)) {
+      let allChaptersData = [...firstPageData.chapters];
+      const totalPages = firstPageData.pages_count || 1;
       
-      // The chapters page contains a JSON payload in window.__DATA__
-      const jsonMatch = chapterHtml.match(/window\.__DATA__\s*=\s*({[\s\S]+?});/);
-      if (jsonMatch) {
-        const data = JSON.parse(jsonMatch[1]);
-        if (data.chapters && Array.isArray(data.chapters)) {
-          data.chapters.forEach((c: any) => {
-            const cleanTitle = c.title.trim();
-            // Strictly match 'Chapter [number]' at the start to avoid junk recommendations
-            if (/^chapter\s*\d+/i.test(cleanTitle)) {
-              const numMatch = cleanTitle.match(/\d+/);
-              const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
-              
-              // Prevent duplicates
-              if (!chapters.find(existing => existing.url === c.link)) {
-                chapters.push({
-                  title: cleanTitle,
-                  url: c.link,
-                  chapterNumber
-                });
-              }
+      if (totalPages > 1) {
+        // Fetch remaining pages in batches of 5 to speed up without hitting strict rate limits
+        for (let i = 2; i <= totalPages; i += 5) {
+          const batchPromises = [];
+          for (let j = 0; j < 5 && (i + j) <= totalPages; j++) {
+            batchPromises.push(fetchChapterPage(`https://ranobes.net/chapters/${novelId}/page/${i + j}/`));
+          }
+          const batchResults = await Promise.all(batchPromises);
+          for (const data of batchResults) {
+            if (data && data.chapters && Array.isArray(data.chapters)) {
+              allChaptersData = allChaptersData.concat(data.chapters);
             }
-          });
+          }
         }
       }
-    } catch (e) {
-      console.warn("Failed to fetch chapters from chapters endpoint:", e);
+
+      // Process all collected chapter JSON objects
+      allChaptersData.forEach((c: any) => {
+        const cleanTitle = c.title.trim();
+        if (/^chapter\s*\d+/i.test(cleanTitle)) {
+          const numMatch = cleanTitle.match(/\d+/);
+          const chapterNumber = numMatch ? parseFloat(numMatch[0]) : chapters.length + 1;
+          
+          if (!chapters.find(existing => existing.url === c.link)) {
+            chapters.push({
+              title: cleanTitle,
+              url: c.link,
+              chapterNumber
+            });
+          }
+        }
+      });
     }
   }
 
